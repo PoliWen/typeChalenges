@@ -45,7 +45,7 @@ function TupleToobject(array:(string | number | symbol)[]){
 
 // 遍历一个只读属性的数组
 type tupleToObject<T extends readonly (string | number | symbol)[]> = {
-    [p in keyof T]:p
+    [p in  T[number]]:p
 }
 
 // 第四道，easyArrFirst
