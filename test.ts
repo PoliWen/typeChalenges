@@ -117,7 +117,7 @@ type c = Concat<[1],[2]>
 type Tail<T extends any[]> = T extends [...any, infer last] ? last : never
 type Tail2<T extends any[]> = [any,...T][T['length']]
 type Tail3<T extends any[]> = T extends [infer first, ... infer rest] ? T[rest['length']]: never
-type tail = Tail3<[1,2,3]>
+type tail = Tail<[1,2,3]>
 
 
 // 第十题，实现Includes
