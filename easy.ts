@@ -6,3 +6,4 @@ type MyTupleToObject<T extends readonly (string|number)[]> = {
     [P in T[number]]:P
 }
 type cases = MyTupleToObject<typeof tupleNumber>
+
