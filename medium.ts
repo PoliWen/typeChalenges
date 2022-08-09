@@ -26,5 +26,9 @@ const todo: MyReadOnly2<Todo, 'title' | 'description'> = {
 
 type TestReadOnly2 = MyReadonly2<Todo, 'title' | 'description'>
 
-type Tail<T extends unknown[]>= T extends [...unknown[],infer rest] ? rest : never
-type TestTail = Tail<[1,2,3]>
+type Pop<T extends unknown[]>= T extends [...infer F, infer L] ? F : never
+
+type Last<T extends unknown[]>= T extends [...infer F,infer L] ? L : never
+type TestLast = Last<[1,2,3]>
+
+type TestPop=Pop<[1,2,3]>
