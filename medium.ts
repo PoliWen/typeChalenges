@@ -25,3 +25,6 @@ const todo: MyReadOnly2<Todo, 'title' | 'description'> = {
 }
 
 type TestReadOnly2 = MyReadonly2<Todo, 'title' | 'description'>
+
+type Tail<T extends unknown[]>= T extends [...unknown[],infer rest] ? rest : never
+type TestTail = Tail<[1,2,3]>
