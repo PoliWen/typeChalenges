@@ -32,3 +32,16 @@ type Last<T extends unknown[]>= T extends [...infer F,infer L] ? L : never
 type TestLast = Last<[1,2,3]>
 
 type TestPop=Pop<[1,2,3]>
+
+type TrimLeft<Str extends string> = Str extends `${' '|'\n'|'\t'}${infer Rest}` ? TrimLeft<Rest> : Str 
+
+type TestTrimLeft = TrimLeft<'   hello'>
+
+type TrimRight<Str extends string> = Str extends `${infer Rest}${' '|'\n'|'\t'}` ? TrimRight<Rest>: Str
+type TestTrimRight = TrimRight<'hello   '>
+
+type Trim<Str extends string> = TrimRight<TrimLeft<Str>>
+
+type TestTrim = Trim<'   hello   '>
+
+
