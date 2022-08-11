@@ -44,4 +44,9 @@ type Trim<Str extends string> = TrimRight<TrimLeft<Str>>
 
 type TestTrim = Trim<'   hello   '>
 
+type StartsWith<T extends string,P extends string> = T extends `${P}${string}` ? true : false
 
+type TestStartWidth = StartWith<'abc','ac'>
+
+type EndWith<T extends string,E extends string> = T extends `${string}${E}` ? true : false
+type TestStartEndWith= EndWith<'abc','bc'>
