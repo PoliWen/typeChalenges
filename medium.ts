@@ -60,4 +60,14 @@ type StringToArray<S extends string> =
 
 type LengthOfString<S extends string> = StringToArray<S>['length']
 
+type Replace<
+  S extends string,
+  From extends string,
+  To extends string,
+> = S extends `${infer B}${From}${infer E}`
+  ? `${B}${E}` extends S
+    ? S
+    : `${B}${To}${E}`
+  : S;
+
 type TestLengthOfString=LengthOfString<'hello'>
