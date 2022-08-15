@@ -50,3 +50,14 @@ type TestStartWidth = StartWith<'abc','ac'>
 
 type EndWith<T extends string,E extends string> = T extends `${string}${E}` ? true : false
 type TestStartEndWith= EndWith<'abc','bc'>
+
+// type LengthOfString<S extends String,T extends String[]>= S extends `${infer F}${infer R}` ? LengthOfString<R,[...T,F]> : T['length']
+
+type StringToArray<S extends string> = 
+    S extends `${infer F}${infer R}` 
+        ? [F, ...StringToArray<R>] 
+        : []
+
+type LengthOfString<S extends string> = StringToArray<S>['length']
+
+type TestLengthOfString=LengthOfString<'hello'>
