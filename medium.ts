@@ -63,3 +63,17 @@ type TestLengthOfString=LengthOfString<'hello'>
 type Replace<S extends string,From extends string,To extends string> = From extends '' ? S : S extends `${infer F}${From}${infer R}` ? `${F}${To}${R}`: S
 
 type TestReplace=Replace<'hellou','ou','o'>
+
+type DeepReadonly<T>={
+    readonly [P in keyof T]:keyof T[P] extends never ? T[P] : DeepReadonly <T[P]>
+}
+
+type X = { 
+    x: { 
+      a: 1
+      b: 'hi'
+    }
+    y: 'hey'
+  }
+  
+type TestDeepReadonly= DeepReadonly<X>
