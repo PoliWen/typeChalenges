@@ -77,3 +77,8 @@ type X = {
   }
   
 type TestDeepReadonly= DeepReadonly<X>
+
+
+type MyCapitalize<T extends string> = T extends `${infer F}${infer R}` ? `${Uppercase<F>}${R}` : T
+
+type TestMyCapitalize = MyCapitalize<'hello world'>
