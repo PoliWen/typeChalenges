@@ -98,3 +98,10 @@ type CamelCase<S extends string> =
     : Lowercase<S>
 
 type TestCamelCase=CamelCase<'dog_dog_dog'>
+
+type DropString<T extends string,R extends string> = 
+  T extends `${infer left}${R}${infer rest}` ? 
+  `${left}${DropString<rest,R>}`
+  : T
+
+type TestDropString=DropString<'butter fly!', 'but'>
