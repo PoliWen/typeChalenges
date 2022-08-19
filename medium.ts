@@ -82,3 +82,19 @@ type TestDeepReadonly= DeepReadonly<X>
 type MyCapitalize<T extends string> = T extends `${infer F}${infer R}` ? `${Uppercase<F>}${R}` : T
 
 type TestMyCapitalize = MyCapitalize<'hello world'>
+
+
+type Zip<F extends unknown[],S extends unknown[]>=
+    [F,S] extends [[infer L,...infer restF],[infer R,...infer restS]] ? 
+    [[L,R],...Zip<restF,restS>]
+    :
+    []
+type TestZip = Zip<[1,2],['First','second']>
+
+
+type CamelCase<S extends string> = 
+    S extends `${infer left}_${infer right}${infer rest}` 
+    ? `${Lowercase<left>}${Uppercase<right>}${CamelCase<rest>}` 
+    : Lowercase<S>
+
+type TestCamelCase=CamelCase<'dog_dog_dog'>

@@ -159,3 +159,5 @@ type Unshift<T extends any[],U> = [U,...T]
 
 type Pop<T extends any[]> = T extends [...infer first, infer last] ? first : never
 type pp = Pop<[1,2,3]>
+
+

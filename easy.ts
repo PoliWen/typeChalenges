@@ -51,3 +51,14 @@ type MyParameters<T extends (...args:any)=> any>= T extends (...args: infer P)=>
 
 const foo = (arg1: string, arg2: number): void => {}
 type testMyParamters = MyParameters<typeof foo>
+
+type Zip<first extends unknown[],second extends unknown[]> = 
+    first extends [infer f1,infer s1] ? 
+         second extends [infer f2,infer s2] ? 
+         [[f1,f2],[s1,s2]] 
+         :
+         []
+    :
+    []
+
+
