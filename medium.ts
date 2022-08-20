@@ -60,9 +60,25 @@ type LengthOfString<S extends string> = StringToArray<S>['length']
 
 type TestLengthOfString=LengthOfString<'hello'>
 
-type Replace<S extends string,From extends string,To extends string> = From extends '' ? S : S extends `${infer F}${From}${infer R}` ? `${F}${To}${R}`: S
+type Replace<S extends string,From extends string,To extends string> = 
+    From extends '' 
+    ? S 
+    : S extends `${infer F}${From}${infer R}` 
+        ? `${F}${To}${R}`
+        : S
 
-type TestReplace=Replace<'hellou','ou','o'>
+type TestReplace=Replace<'hellou','l','o'>
+
+
+
+type ReplaceAll<S extends string,From extends string,To extends string> = 
+    From extends '' 
+    ? S 
+    : S extends `${infer F}${From}${infer R}` 
+        ? `${F}${To}${ReplaceAll<R,From,To>}`
+        : S
+
+type TestReplaceAll = ReplaceAll<'hellou','l','o'>
 
 type DeepReadonly<T>={
     readonly [P in keyof T]:keyof T[P] extends never ? T[P] : DeepReadonly <T[P]>
@@ -99,9 +115,42 @@ type CamelCase<S extends string> =
 
 type TestCamelCase=CamelCase<'dog_dog_dog'>
 
-type DropString<T extends string,R extends string> = 
+type DropChar<T extends string,R extends string> = 
   T extends `${infer left}${R}${infer rest}` ? 
-  `${left}${DropString<rest,R>}`
+  `${left}${DropChar<rest,R>}`
   : T
 
-type TestDropString=DropString<'butter fly!', 'but'>
+type TestDropString=DropChar<'butter fly!', 'but'>
+
+type ReverseArr<T extends unknown[]> = T extends [infer first,...infer rest] ? [...ReverseArr<rest>,first]: T
+type TestReverseArr =  ReverseArr<[1,2,3,4,5]>
+
+type StringToUnion<T extends string> = 
+    T extends `${infer F}${infer Rest}` ?
+    F | StringToUnion<Rest>
+    : never
+
+
+type ReverseString<T extends string,result extends string=''> = 
+    T extends `${infer first}${infer rest}`?
+    ReverseString<rest,`${first}${result}`>
+    : result
+
+type TestReverseString = ReverseString<'123'>
+
+type IsAny<T> = 'ddd' extends ('ggg' & T)? true:false // 用any和任意类型交叉都是any类型的特点
+type TestIsAny = IsAny<'tttt'>
+
+type IsUnion<A,B = A> = 
+  A extends A 
+  ? [B] extends [A] 
+        ? false
+        : true
+  : never
+
+type TestIsUnion = IsUnion<'a'|'b'>
+
+type IsNever<T> = [T] extends [never] ? true : false
+type TestIsNever = IsNever<never>
+
+// 疑问点：ts中类型用[]包裹起来是什么意思
