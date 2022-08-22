@@ -169,3 +169,10 @@ type Coo = {
 }
 type diff<T,U> = Omit<T & U,keyof T & keyof U>
 type TestDiff = diff<Foo,Bar>
+
+type KebabCase<Str extends string> = 
+    Str extends `${infer First}${infer Rest}`
+        ? First extends Lowercase<First> 
+            ? `${First}${KebabCase<Rest>}`
+            : `-${Lowercase<First>}${KebabCase<Rest>}`
+        : Str;
