@@ -154,3 +154,18 @@ type IsNever<T> = [T] extends [never] ? true : false
 type TestIsNever = IsNever<never>
 
 // 疑问点：ts中类型用[]包裹起来是什么意思
+type Foo = {
+    name: string
+    age: string
+}
+type Bar = {
+    name: string
+    age: string
+    gender: number
+}
+type Coo = {
+    name: string
+    gender: number
+}
+type diff<T,U> = Omit<T & U,keyof T & keyof U>
+type TestDiff = diff<Foo,Bar>
