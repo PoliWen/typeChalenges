@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>vue direactive自定义命令</title>
+    <script type="text/javascript" src="js/vue.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <p v-wxl="{'color':'red','text':'这是一个自定义指令，vue是非常简单东西'}"></p>
+        <input type="text" name="focus" v-focus>
+    </div>
+    <div id="app2">
+        <input type="text" v-focus v-model='msg'>
+        <p v-changecolor>{{msg}}</p>
+        <div  v-click-outside="outsideClick">xxxxxxoooooo</div>
+    </div>
+    <script type="text/javascript">
+        //自定义一个directive指令
+        Vue.directive('wxl', function(el, para) {
+            el.style.background = para.value.color;
+            el.innerHTML = para.value.text;
+        });
+        //自定义一个全局的input框聚焦事件
+        Vue.directive('focus', {
+            inserted: function(el) {
+                el.focus();
+            }
+        });
+
+        // 提交验证
+        Vue.directive('clickOutside', {
+            // 初始化指令
+            bind(el, binding) {
+                function clickHandler(e) {
+                    // 这里判断点击的元素是否是本身，是本身，则返回
+                    if (el.contains(e.target)) {
+                        return false;
+                    }
+                    // 判断指令中是否绑定了函数
+                    if (binding.expression) {
+                        console.log('true')
+                        // 如果绑定了函数 则调用那个函数，此处binding.value就是handleClose方法
+                        binding.value(e);
+                    }
+                }
+                // 给当前元素绑定个私有变量，方便在unbind中可以解除事件监听
+                el.__vueClickOutside__ = clickHandler;
+                document.addEventListener('click', clickHandler);
+            },
+            unbind(el) {
+                // 解除事件监听
+                document.removeEventListener('click', el.__vueClickOutside__);
+                delete el.__vueClickOutside__;
+            },
+        });
+
+        var app = new Vue({
+            el: '#app'
+        });
+        //百度搜索利用自定义指令能够做出来什么炫酷的东西，然后将别人的东西结合起来开发一个自己的好东西。
+        var app2 = new Vue({
+            el: '#app2',
+            data: {
+                msg: '这是一个局部定义的指令'
+            },
+            directives: {
+                focus: {
+                    inserted: function(el) {
+                        el.focus();
+                        el.value = '自定义指令改变input框的值';
+                        el.style.color = 'red';
+                    }
+                },
+                changecolor: {
+                    bind: function(el) {
+                        //做一个变色的文字
+                        el.style.color = "#" + Math.random().toString(16).slice(2, 8);
+                    }
+                }
+            },
+            methods:{
+                outsideClick(){
+                    console.log('xxxxxxxxxxxxxxx')
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
