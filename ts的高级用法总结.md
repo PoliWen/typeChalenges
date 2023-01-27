@@ -151,11 +151,128 @@ function getShopStatus(status: number): string{
 
 ### 装饰器的使用
 
+> 在不改变类的内部结构下，对类进行修饰
+
+不使用装饰器，对一个类的方法添加try catch
+
+```typescript
+const userInfo:unknown = undefined
+
+interface UserInfo {
+    name: string
+    age: number
+}
+
+class User{
+    name:string;
+    age:number;
+    constructor(userInfo:UserInfo){
+        this.name = userInfo.name
+        this.age = userInfo.age
+    }
+    getName(){
+        try{
+            return userInfo.name  // 此处userInfo.name 会报错,因为前面定义了一个全局变量
+        }catch{
+            console.log('userInfo.name不存在')
+        }
+    }
+    getAge(){
+        try{
+            return userInfo.age // 此处userInfo.age 会报错,因为前面定义了一个全局变量
+        }catch(e){
+            console.log('userInfo.age不存在')
+        }
+    } 
+}
+
+const zhangsan = new User({name:'zhangsan',age:28})
 ```
 
+写一个try catch的装饰器进行改装
 
+```typescript
+const userInfo:any = undefined
 
+interface UserInfo{
+    name: string
+    age: number
+}
+
+function tryCatchDecorator(errorMsg: string){
+    return function(target:any, key: string, descriptor: any){
+        const originFn = descriptor.value
+        descriptor.value = ()=>{
+            try{
+                originFn()
+            }catch(e){
+                console.log('error' + errorMsg)
+            }
+        }
+    }
+}
+
+class User{
+    name:string;
+    age:number;
+    constructor(userInfo:UserInfo){
+        this.name = userInfo.name
+        this.age = userInfo.age
+    }
+    @tryCatchDecorator('nameError')
+    getName(){
+        return userInfo.name
+    }
+    @tryCatchDecorator('ageError')
+    getAge(){
+        return userInfo.age
+    }
+}
+
+const zhangsan = new User({name:'zhangsan',age:28})
+
+zhangsan.getName()
+zhangsan.getAge()
 ```
+
+**装饰器的使用总结：**
+
+- 装饰器可以叠加使用，调用的顺序为从下往上
+
+- 装饰器需要传参，则将装饰器返回一个函数
+
+- 类装饰器传入的参数，为类的构造函数
+
+- 类成员方法传入的参数，分别为target: 对应类的prototype，key: 函数的名称   descriptor: 属性的[[描述器](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertyDescriptor)]
+
+  ```typescript
+  
+  function tryCatchDecorator(errorMsg:string){
+      return function(target:any, key: string, descriptor: any){
+          console.log('target',target)
+          console.log('key',key) // getAge
+          console.log('descriptor',descriptor) 
+          /*
+           {
+                value: [Function: getAge],
+                writable: true,
+                enumerable: false,
+                configurable: true
+            }
+          */
+          const originFn = descriptor.value
+          descriptor.value = ()=>{
+              try{
+                  originFn()
+              }catch(e){
+                  console.log('error'+errorMsg)
+              }
+          }
+      }
+  }
+  ```
+
+  
 
 ### extends关键字
 
@@ -167,10 +284,10 @@ extends有两种用法
 type IsTwo<T> = T extends 2 ? true : false
 ```
 
-2.限定范围,类型约束
+2.限定范围，类型约束
 
 ```typescript
-type replace<str extends string,from,to> = str extends 
+type ConcatStr<S1 extends string,S2 extends string> = `${S1}-${S2}`
 ```
 
 ### infer关键字
@@ -396,11 +513,78 @@ invokeCallback(1)
 ```
 ### 函数重载
 
-我们知道很多库中都大量使用了函数重载，例如vue3，vueuse中，那么什么是函数重载
+我们知道很多库中都大量使用了函数重载
+
+例如vue3中关于ref的重载
+
+```typescript
+export function ref<T extends object>(
+  value: T
+): [T] extends [Ref] ? T : Ref<UnwrapRef<T>>
+export function ref<T>(value: T): Ref<UnwrapRef<T>>
+export function ref<T = any>(): Ref<T | undefined>
+export function ref(value?: unknown) {
+  return createRef(value, false)
+}
+```
+
+vueUse中的useLocalStorage
+
+```typescript
+export function useLocalStorage(key: string, initialValue: MaybeComputedRef<string>, options?: UseStorageOptions<string>): RemovableRef<string>
+export function useLocalStorage(key: string, initialValue: MaybeComputedRef<boolean>, options?: UseStorageOptions<boolean>): RemovableRef<boolean>
+export function useLocalStorage(key: string, initialValue: MaybeComputedRef<number>, options?: UseStorageOptions<number>): RemovableRef<number>
+export function useLocalStorage<T>(key: string, initialValue: MaybeComputedRef<T>, options?: UseStorageOptions<T>): RemovableRef<T>
+export function useLocalStorage<T = unknown>(key: string, initialValue: MaybeComputedRef<null>, options?: UseStorageOptions<T>): RemovableRef<T>
 
 ```
 
+**为什么要使用函数重载，函数重载能够解决什么问题，有什么好处呢？**
+
+> 通常一个方法由于参数可以是多种类型，参数不同函数要做不同的处理，返回不同的结果。如果全都一次性定义的话，会导致代码不清晰。
+>
+> 而重载就是为了解决这个问题的，通过定义不同重载的方法，让函数的职责看起来遵循单一职责原理，同时使用了重载定义好了函数的类型，会拥有更好的类型检测与断言提醒
+
+如下没有使用函数重载
+
+```typescript
+function add(x:string | number,y: string | number): string | number{
+    if(typeof x === 'string' && typeof y === 'string'){
+      	return `${x},${y} `
+    }else if(typeof x === 'string' && typeof y === 'number' || typeof x === 'number' && typeof y === 'string'){
+       return `${x},${y} `
+    }else{
+       return x + y   
+    }
+}
 ```
+
+可以发现没有使用重载的函数，参数的类型定义和返回都混到一起了，不是代码看起来不是很清晰
+
+使用函数重载进行改造
+
+> 函数重载可以定义多个重载签名，重载签名定义函数的参数返回类型，返回类型，没有函数体的具体实现
+>
+> 函数重载需要定义个实现签名，实现签名不需要定义参数类型和返回类型，只需要实现具体函数即可
+
+```typescript
+function add(x: string, y: string): string
+function add(x: number, y: number): number
+function add(x: string, y: number): string
+function add(x: number, y: string): string
+
+function add(x:unknown,y: unknown){
+    if(typeof x === 'string' && typeof y === 'string'){
+      	return `${x},${y} `
+    }else if(typeof x === 'string' && typeof y === 'number' || typeof x === 'number' && typeof y === 'string'){
+       return `${x},${y} `
+    }else{
+       return x + y   
+    }
+}
+```
+
+经过函数重载进行改造之后，函数的功能一目了然
 
 ### 内置高级类型实现
 
@@ -513,3 +697,6 @@ function add(a: number, b: number): number{
 type Test = MyReturnType<typeof add> // number
 ````
 
+以上内容为自己学习总结：有不对之处欢迎批评指正
+
+参考文章：https://saul-mirone.github.io/zh-hans/a-complete-guide-to-typescript-decorator/
